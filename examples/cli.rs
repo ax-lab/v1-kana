@@ -15,7 +15,12 @@ fn main() {
 		match input {
 			Ok(line) => {
 				rl.add_history_entry(line.as_str());
-				println!("\n   Input: {}\n", line);
+				println!();
+				println!("   Input:    {}", line.as_str());
+				println!("   Hiragana: {}", x_kana::to_hiragana(line.as_str()));
+				println!("   Katakana: {}", x_kana::to_katakana(line.as_str()));
+				println!("   Romaji:   {}", x_kana::to_romaji(line.as_str()));
+				println!();
 			}
 			Err(ReadlineError::Interrupted | ReadlineError::Eof) => {
 				println!();
@@ -24,6 +29,4 @@ fn main() {
 			Err(err) => println!("\n   Error: {}\n", err),
 		}
 	}
-
-	println!("{}", x_kana::bye());
 }
