@@ -21,3 +21,6 @@ pub use is::*;
 
 mod to;
 pub use to::*;
+
+mod kind;
+pub use kind::*;

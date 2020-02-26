@@ -406,6 +406,7 @@ mod tests {
 
 		// Archaic
 		check("ゐゑ ゟ ヿ", "wiwe yori koto");
+		check("ます〼", "masumasu");
 
 		// Small tsu at the end of words
 		check("ふっ", "fu'");

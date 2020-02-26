@@ -652,6 +652,7 @@ lazy_static! {
 
 		"ヿ" => "koto", // U+30FF - Katakana Digraph Koto
 		"ゟ" => "yori", // U+309F - Hiragana Digraph Yori
+		"〼" => "masu", // U+303C - Masu Mark
 
 		// Uncommon character combos
 		"きぇ" => "kye",

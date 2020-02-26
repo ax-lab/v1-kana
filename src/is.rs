@@ -30,13 +30,24 @@ pub fn is_hiragana(chr: char) -> bool {
 pub fn is_katakana(chr: char) -> bool {
 	match chr {
 		'ヿ' | 'ー' => true, // U+30FF - Katakana Digraph Koto
-		_ => char_in_range(chr, KATAKANA_START, KATAKANA_END),
+		_ => {
+			char_in_range(chr, KATAKANA_START, KATAKANA_END)
+				|| char_in_range(chr, SMALL_KATAKANA_START, SMALL_KATAKANA_END)
+				|| char_in_range(chr, HALF_KATAKANA_START, HALF_KATAKANA_END)
+		}
 	}
 }
 
 /// Returns true if the character is a kanji.
 pub fn is_kanji(chr: char) -> bool {
-	char_in_range(chr, KANJI_START, KANJI_END)
+	match chr as u32 {
+		KANJI_START..=KANJI_END => true,
+		KANJI_START_A..=KANJI_END_A => true,
+		KANJI_START_B..=KANJI_END_B => true,
+		KANJI_START_C..=KANJI_END_C => true,
+		KANJI_START_D..=KANJI_END_D => true,
+		_ => false,
+	}
 }
 
 /// Returns true if the character is hiragana or katakana.
