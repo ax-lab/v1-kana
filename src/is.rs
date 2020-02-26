@@ -30,6 +30,7 @@ pub fn is_hiragana(chr: char) -> bool {
 pub fn is_katakana(chr: char) -> bool {
 	match chr {
 		'ヿ' => true, // U+30FF - Katakana Digraph Koto
+		'ｰ' => false,
 		_ => {
 			char_in_range(chr, KATAKANA_START, KATAKANA_END)
 				|| char_in_range(chr, SMALL_KATAKANA_START, SMALL_KATAKANA_END)

@@ -3,6 +3,9 @@
 //! This library provides fast translation between Hiragana, Katakana and Romaji
 //! as well as utility functions to test different Japanese characters.
 
+#![feature(test)]
+extern crate test;
+
 extern crate fnv;
 
 #[macro_use]
@@ -30,6 +33,54 @@ pub use kind::*;
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use test::Bencher;
+
+	const INPUT: &'static str = "
+		ぁあぃいぅうぇえぉおかがきぎくぐけげこご
+		ハバパヒビピフブプヘベペホボポ
+		ABCDEFGHIJKLMNOPQRSTUVWXYZ
+		ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ
+		㈠㈡㈢㈣㈤㈥㈦㈧㈨㈩㈪㈫㈬㈭㈮㈯㈰㈱㈲㈳㈴㈵㈶㈷㈸㈹㈺㈻㈼㈽㈾㈿㉀㉁㉂㉃㊀㊁㊂㊃
+		㊄㊅㊆㊇㊈㊉㊊㊋㊌㊍㊎㊏㊐㊑㊒㊓㊔㊕㊖㊗㊘㊙㊚㊛㊜㊝㊞㊟㊠㊡㊢㊣㊤㊥㊦㊧㊨㊩㊪㊫
+		㊬㊭㊮㊯㊰㊱㊲㊳㊴㊵㊶㊷㊸㊹㊺㊻㊼㊽㊾㊿㋀㋁㋂㋃㋄㋅㋆㋇㋈㋉㋊㋋㋐㋑㋒㋓㋔㋕㋖㋗
+		㋘㋙㋚㋛㋜㋝㋞㋟㋠㋡㋢㋣㋤㋥㋦㋧㋨㋩㋪㋫㋬㋭㋮㋯㋰㋱㋲㋳㋴㋵㋶㋷㋸㋹㋺㋻㋼㋽㋾㌀
+		漢字日本語文字言語言葉
+		一丁丂七丄丅丆万丈三上下丌不与丏
+		捰捱捲捳捴捵捶捷捸捹捺捻捼捽捾捿
+		満溁溂溃溄溅溆溇溈溉溊溋溌溍溎溏
+		觐觑角觓觔觕觖觗觘觙觚觛觜觝觞觟
+		䁰䁱䁲䁳䁴䁵䁶䁷䁸䁹䁺䁻䁼䁽䁾䁿
+		䰀䰁䰂䰃䰄䰅䰆䰇䰈䰉䰊䰋䰌䰍䰎䰏
+		䶰䶱䶲䶳䶴䶵㐀䰼䰽䰾䩍䩎䩏䰿䶵
+		𠀀𠂹𠂺𠂻𠂼𠂽𠳜𠳝𠳞𪏲𪏴𪏵𪏶𩺔𩺕𩺗𩺘𪛖
+		𪜀𫙑𫙒𫙓𫑘𫑙𫑚𫑝𫜴𫝀𫞁𫞂𫞃𫞄𫟅𫟇𫟉𫠝
+	";
+
+	#[bench]
+	fn bench_is_kanji(b: &mut Bencher) {
+		b.iter(|| {
+			let mut count = 0;
+			for chr in INPUT.chars() {
+				if is_kanji(chr) {
+					count += 1;
+				}
+			}
+			count
+		})
+	}
+
+	#[bench]
+	fn bench_get_kind(b: &mut Bencher) {
+		b.iter(|| {
+			let mut count = 0;
+			for chr in INPUT.chars() {
+				if get_kind(chr) == CharKind::Kanji {
+					count += 1;
+				}
+			}
+			count
+		})
+	}
 
 	#[test]
 	fn test_char_kind() {

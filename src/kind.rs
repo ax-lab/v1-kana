@@ -3,7 +3,7 @@
 use super::constants::*;
 
 /// Enumeration with character kinds.
-#[derive(Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CharKind {
 	/// Any character that is neither japanese nor romaji.
 	None,
