@@ -21,7 +21,7 @@ pub fn is_word_mark(chr: char) -> bool {
 /// combining diacritics and marks from U+3099 and U+309F.
 pub fn is_hiragana(chr: char) -> bool {
 	match chr {
-		'ゟ' | 'ー' => true, // U+309F - Hiragana Digraph Yori
+		'ゟ' => true, // U+309F - Hiragana Digraph Yori
 		_ => char_in_range(chr, HIRAGANA_START, HIRAGANA_END),
 	}
 }
@@ -29,7 +29,7 @@ pub fn is_hiragana(chr: char) -> bool {
 /// Returns true if the character is Katakana or `ー`.
 pub fn is_katakana(chr: char) -> bool {
 	match chr {
-		'ヿ' | 'ー' => true, // U+30FF - Katakana Digraph Koto
+		'ヿ' => true, // U+30FF - Katakana Digraph Koto
 		_ => {
 			char_in_range(chr, KATAKANA_START, KATAKANA_END)
 				|| char_in_range(chr, SMALL_KATAKANA_START, SMALL_KATAKANA_END)
@@ -50,9 +50,16 @@ pub fn is_kanji(chr: char) -> bool {
 	}
 }
 
-/// Returns true if the character is hiragana or katakana.
+/// Returns true if the character is hiragana, katakana or the prolonged sound
+/// mark.
 pub fn is_kana(chr: char) -> bool {
-	is_hiragana(chr) || is_katakana(chr)
+	is_hiragana(chr) || is_katakana(chr) || chr == 'ー' || chr == 'ｰ'
+}
+
+/// Returns true if the character is hiragana, katakana, kanji or the prolonged
+/// sound mark.
+pub fn is_letter(chr: char) -> bool {
+	is_kana(chr) || is_kanji(chr)
 }
 
 /// Returns true if the character is a japanese-style punctuation.
@@ -96,7 +103,7 @@ mod tests {
 
 	#[test]
 	fn test_is_hiragana() {
-		let s = "ーぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゐゑゟ";
+		let s = "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゐゑゟ";
 		for chr in s.chars() {
 			assert!(is_hiragana(chr), "is_hiragana({})", chr);
 		}
@@ -116,7 +123,7 @@ mod tests {
 
 	#[test]
 	fn test_is_katakana() {
-		let s = "ーァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺヿ";
+		let s = "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺヿ";
 		for chr in s.chars() {
 			assert!(is_katakana(chr), "is_katakana({})", chr);
 		}
