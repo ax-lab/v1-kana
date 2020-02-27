@@ -282,6 +282,25 @@ mod tests {
 			)
 		}
 
+		for chr in JAPANESE_PUNCTUATION.chars() {
+			assert!(
+				is_japanese_punctuation(chr),
+				"expected `{}` (U+{:04X}) to be a japanese punctuation",
+				chr,
+				chr as u32,
+			)
+		}
+
+		let all_marks = JAPANESE_MARK.to_string() + BAR_LINE;
+		for chr in all_marks.chars() {
+			assert!(
+				is_japanese_mark(chr),
+				"expected `{}` (U+{:04X}) to be a japanese mark",
+				chr,
+				chr as u32,
+			)
+		}
+
 		fn check(input: &'static str, expected: CharKind) {
 			for chr in input.chars() {
 				let kind = get_kind(chr);

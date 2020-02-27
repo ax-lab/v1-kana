@@ -1,45 +1,26 @@
 //! Character test functions.
 
-use super::constants::*;
-use super::util::char_in_range;
-
-/// Returns true for non-kana phonetic marks used intra word.
-pub fn is_word_mark(chr: char) -> bool {
-	match chr {
-		'ー' | '・' => true,
-		// Katakana and Hiragana Iteration marks
-		'ヽ' | 'ヾ' | 'ゝ' | 'ゞ' => true,
-		// Dakuten and Handakuten
-		'゛' | '゜' => true,
-		_ => false,
-	}
-}
-
-/// Returns true if the character is Hiragana or `ー`.
+/// Returns true if the character is Hiragana letter.
 ///
 /// Note that this excludes characters from the hiragana block such as the
 /// combining diacritics and marks from U+3099 and U+309F.
 pub fn is_hiragana(chr: char) -> bool {
 	match chr {
-		'ゟ' => true, // U+309F - Hiragana Digraph Yori
-		_ => char_in_range(chr, HIRAGANA_START, HIRAGANA_END),
+		hiragana_range!() => true,
+		_ => false,
 	}
 }
 
-/// Returns true if the character is Katakana or `ー`.
+/// Returns true if the character is a Katakana letter.
 pub fn is_katakana(chr: char) -> bool {
 	match chr {
-		'ヿ' => true, // U+30FF - Katakana Digraph Koto
-		'ｰ' => false,
-		_ => {
-			char_in_range(chr, KATAKANA_START, KATAKANA_END)
-				|| char_in_range(chr, SMALL_KATAKANA_START, SMALL_KATAKANA_END)
-				|| char_in_range(chr, HALF_KATAKANA_START, HALF_KATAKANA_END)
-		}
+		katakana_range!() => true,
+		katakana_half_range!() => true,
+		_ => false,
 	}
 }
 
-/// Returns true if the character is a kanji.
+/// Returns true if the character is a Kanji letter.
 pub fn is_kanji(chr: char) -> bool {
 	match chr {
 		kanji_range!() => true,
@@ -50,7 +31,13 @@ pub fn is_kanji(chr: char) -> bool {
 /// Returns true if the character is hiragana, katakana or the prolonged sound
 /// mark.
 pub fn is_kana(chr: char) -> bool {
-	is_hiragana(chr) || is_katakana(chr) || chr == 'ー' || chr == 'ｰ'
+	match chr {
+		prolonged_mark_range!() => true,
+		hiragana_range!() => true,
+		katakana_range!() => true,
+		katakana_half_range!() => true,
+		_ => false,
+	}
 }
 
 /// Returns true if the character is hiragana, katakana, kanji or the prolonged
@@ -59,27 +46,19 @@ pub fn is_letter(chr: char) -> bool {
 	is_kana(chr) || is_kanji(chr)
 }
 
+/// Returns true for Japanese word marks, including the prolonged sound mark.
+pub fn is_japanese_mark(chr: char) -> bool {
+	match chr {
+		prolonged_mark_range!() => true,
+		japanese_mark_range!() => true,
+		_ => false,
+	}
+}
+
 /// Returns true if the character is a japanese-style punctuation.
 pub fn is_japanese_punctuation(chr: char) -> bool {
-	match chr as u32 {
-		// CJK Symbols and Punctuation
-		0x3000..=0x303F => true,
-
-		// Katakana punctuation
-		0x30FB | 0x30A0 => true,
-
-		// Kana punctuation
-		0xFF61..=0xFF65 => true, // `｡` to `･`
-
-		// Zenkaku punctuation (Halfwidth and Fullwidth Forms)
-		0xFF01..=0xFF0F => true,              // `！` to `／`
-		0xFF1A..=0xFF1F => true,              // `：` to `？`
-		0xFF3B..=0xFF3F => chr != '\u{FF3E}', // `［` to `＿`, but not `＾`
-		0xFF5B..=0xFF60 => true,              // `｛` to `｠`
-
-		// Currency symbols
-		0xFFE0..=0xFFEE => true,
-
+	match chr {
+		japanese_punctuation_range!() => true,
 		_ => false,
 	}
 }
@@ -89,14 +68,6 @@ pub fn is_japanese_punctuation(chr: char) -> bool {
 #[cfg(test)]
 mod tests {
 	use super::*;
-
-	#[test]
-	fn test_is_word_mark() {
-		let s = "ー・ヽヾゝゞ";
-		for chr in s.chars() {
-			assert!(is_word_mark(chr), "is_word_mark({})", chr);
-		}
-	}
 
 	#[test]
 	fn test_is_hiragana() {
@@ -110,7 +81,7 @@ mod tests {
 			assert!(is_hiragana(chr), "is_hiragana(U+{:04X})", code);
 		}
 
-		for chr in "゠・".chars() {
+		for chr in "ｰー゠・".chars() {
 			assert!(!is_hiragana(chr), "!is_hiragana({})", chr);
 		}
 
@@ -130,7 +101,7 @@ mod tests {
 			assert!(is_katakana(chr), "is_katakana(U+{:04X})", code);
 		}
 
-		for chr in "゠・".chars() {
+		for chr in "ｰー゠・".chars() {
 			assert!(!is_katakana(chr), "!is_katakana({})", chr);
 		}
 
@@ -152,46 +123,5 @@ mod tests {
 
 		assert!(!is_kanji('\u{4DFF}'));
 		assert!(!is_kanji('\u{9FB0}'));
-	}
-
-	#[test]
-	fn test_is_japanese_punctuation() {
-		// Japanese punctuation
-		let s = "　、。〃〄々〆〇〈〉《》「」『』【】〒〓〔〕〖〗〘〙〚〛〜〝〞〟〠〡〢〣〤〥〦〧〨〩〪〭〮〯〫〬〰〱〲〳〴〵〶〷〸〹〺〻〼〽〾〿・！＂＃＄％＆＇（）＊＋，－．／｡｢｣､･：；＜＝゠＞？［＼］＿｛｜｝～｟｠｡｢｣､･￠￡￢￣￤￥￦￨￩￪￫￬￭￮";
-		for chr in s.chars() {
-			assert!(
-				is_japanese_punctuation(chr),
-				"is_japanese_punctuation({}) -- 0x{:04X}",
-				chr,
-				chr as u32
-			);
-		}
-
-		for code in 0x3000..=0x303F {
-			let chr = std::char::from_u32(code).unwrap();
-			assert!(
-				is_japanese_punctuation(chr),
-				"is_japanese_punctuation(U+{:04X})",
-				code
-			);
-		}
-
-		assert!(!is_japanese_punctuation('\u{2FFF}'));
-		assert!(!is_japanese_punctuation('\u{3040}'));
-		assert!(!is_japanese_punctuation('\u{FF00}'));
-		assert!(!is_japanese_punctuation('\u{FFEF}'));
-		assert!(!is_japanese_punctuation('ヽ'));
-		assert!(!is_japanese_punctuation('ー'));
-		assert!(!is_japanese_punctuation('ｚ'));
-		assert!(!is_japanese_punctuation('ｦ'));
-		assert!(!is_japanese_punctuation('０'));
-		assert!(!is_japanese_punctuation('９'));
-		assert!(!is_japanese_punctuation('＠'));
-		assert!(!is_japanese_punctuation('Ｚ'));
-		assert!(!is_japanese_punctuation('＾'));
-		assert!(!is_japanese_punctuation('｀'));
-		assert!(!is_japanese_punctuation('ｚ'));
-		assert!(!is_japanese_punctuation('ヺ'));
-		assert!(!is_japanese_punctuation('ￜ'));
 	}
 }
