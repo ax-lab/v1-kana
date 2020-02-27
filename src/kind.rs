@@ -1,7 +1,5 @@
 //! Kind of japanese characters.
 
-use super::constants::*;
-
 /// Enumeration with character kinds.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CharKind {
@@ -64,101 +62,19 @@ pub enum CharKind {
 
 pub fn get_kind(chr: char) -> CharKind {
 	match chr {
-		//
-		// Latin range
-		//
-		'A'..='Z' | 'a'..='z' => CharKind::Romaji,
-		'â' | 'ê' | 'î' | 'ô' | 'û' => CharKind::Romaji,
-		'Â' | 'Ê' | 'Î' | 'Ô' | 'Û' => CharKind::Romaji,
-		'ā' | 'ē' | 'ī' | 'ō' | 'ū' => CharKind::Romaji,
-		'Ā' | 'Ē' | 'Ī' | 'Ō' | 'Ū' => CharKind::Romaji,
-		'0'..='9' => CharKind::Romaji,
-		' ' | '`' | '~' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '(' | ')' | '-' | '_'
-		| '=' | '+' | '[' | ']' | '{' | '}' | ';' | ':' | '<' | '>' | ',' | '.' | '/' | '?'
-		| '\'' | '"' | '|' | '\\' => CharKind::PunctuationASCII,
-
-		//
-		// Kana
-		//
-		'ー' | 'ｰ' => CharKind::BarLine,
-		'ゟ' => CharKind::Hiragana, // U+309F Hiragana Digraph Yori
-		'ヿ' => CharKind::Katakana, // U+30FF Katakana Digraph Koto
-
-		//
-		// Roman full and halfwidth
-		//
-		'０'..='９' => CharKind::RomanDigit,
-		'Ａ'..='Ｚ' => CharKind::RomanLetter,
-		'ａ'..='ｚ' => CharKind::RomanLetter,
-		'！'..='／' => CharKind::RomanPunctuation,
-		'：'..='＠' => CharKind::RomanPunctuation,
-		'［'..='｀' => CharKind::RomanPunctuation,
-		'｛'..='～' => CharKind::RomanPunctuation,
-
-		//
-		// Japanese punctuation
-		//
-
-		// CJK Symbols and Punctuation
-		'　' | '、' | '。' | '〃' | '〈' | '〉' | '《' | '》' | '「' | '」' | '『' | '』'
-		| '【' | '】' | '〔' | '〕' | '〖' | '〗' | '〘' | '〙' | '〚' | '〛' | '〜' | '〝'
-		| '〞' | '〟' | '〰' | '〽' => CharKind::JapanesePunctuation,
-
-		'々' | '〆' | '〱' | '〲' | '〳' | '〴' | '〵' | '〻' | '〼' | '゛' | '゜' | 'ゝ'
-		| 'ゞ' => CharKind::JapaneseMark,
-
-		'〄' | '〇' | '〒' | '〓' | '〠' | '〶' | '〷' | '〾' | '〿' => {
-			CharKind::JapaneseSymbol
-		}
-
-		// Full and half-width punctuation (includes Kana)
-		'｟'..='･' => CharKind::JapanesePunctuation,
-
-		// Katakana
-		'゠' | '・' => CharKind::JapanesePunctuation,
-		'ヽ' | 'ヾ' => CharKind::JapaneseMark,
-
-		// Full and halfwidth symbols (`￠` to `￮`)
-		'￠'..='￮' => CharKind::JapaneseSymbol,
-
-		//
-		// Misc symbols
-		//
-
-		// Enclosed CJK Letters and Months
-		'㈀'..='㋾' => CharKind::JapaneseSymbol,
-		// CJK Compatibility
-		'㌀'..='㏿' => CharKind::JapaneseSymbol,
-		// CJK Radicals Supplement
-		'⺀'..='⻳' => CharKind::JapaneseSymbol,
-		// Kangxi Radicals
-		'⼀'..='⿕' => CharKind::JapaneseSymbol,
-
-		//
-		// Numeric ranges
-		//
-		_ => match chr as u32 {
-			//
-			// Kana
-			//
-			HIRAGANA_START..=HIRAGANA_END => CharKind::Hiragana,
-			KATAKANA_START..=KATAKANA_END => CharKind::Katakana,
-			SMALL_KATAKANA_START..=SMALL_KATAKANA_END => CharKind::Katakana,
-			HALF_KATAKANA_START..=HALF_KATAKANA_END => CharKind::KatakanaHalfWidth,
-
-			//
-			// Kanji
-			//
-			KANJI_START..=KANJI_END => CharKind::Kanji,
-			KANJI_START_A..=KANJI_END_A => CharKind::Kanji,
-			KANJI_START_B..=KANJI_END_B => CharKind::Kanji,
-			KANJI_START_C..=KANJI_END_C => CharKind::Kanji,
-			KANJI_START_D..=KANJI_END_D => CharKind::Kanji,
-
-			//
-			// Symbols
-			//
-			_ => CharKind::None,
-		},
+		prolonged_mark_range!() => CharKind::BarLine,
+		hiragana_range!() => CharKind::Hiragana,
+		katakana_range!() => CharKind::Katakana,
+		katakana_half_range!() => CharKind::KatakanaHalfWidth,
+		romaji_range!() => CharKind::Romaji,
+		kanji_range!() => CharKind::Kanji,
+		ascii_punctuation_range!() => CharKind::PunctuationASCII,
+		roman_digit_range!() => CharKind::RomanDigit,
+		roman_letter_range!() => CharKind::RomanLetter,
+		roman_punctuation_range!() => CharKind::RomanPunctuation,
+		japanese_punctuation_range!() => CharKind::JapanesePunctuation,
+		japanese_mark_range!() => CharKind::JapaneseMark,
+		japanese_symbol_range!() => CharKind::JapaneseSymbol,
+		_ => CharKind::None,
 	}
 }

@@ -41,12 +41,8 @@ pub fn is_katakana(chr: char) -> bool {
 
 /// Returns true if the character is a kanji.
 pub fn is_kanji(chr: char) -> bool {
-	match chr as u32 {
-		KANJI_START..=KANJI_END => true,
-		KANJI_START_A..=KANJI_END_A => true,
-		KANJI_START_B..=KANJI_END_B => true,
-		KANJI_START_C..=KANJI_END_C => true,
-		KANJI_START_D..=KANJI_END_D => true,
+	match chr {
+		kanji_range!() => true,
 		_ => false,
 	}
 }

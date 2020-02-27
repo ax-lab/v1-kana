@@ -3,10 +3,14 @@
 //! This library provides fast translation between Hiragana, Katakana and Romaji
 //! as well as utility functions to test different Japanese characters.
 
+// Need this because of `ranges.rs`
+#![allow(unused_parens)]
+#![feature(or_patterns)]
+// Need this for benchmarks
 #![feature(test)]
-extern crate test;
 
 extern crate fnv;
+extern crate test;
 
 #[macro_use]
 extern crate lazy_static;
@@ -18,6 +22,9 @@ extern crate lazy_static;
 mod constants;
 mod table;
 mod util;
+
+#[macro_use]
+mod ranges;
 
 mod is;
 pub use is::*;
@@ -188,6 +195,10 @@ mod tests {
 			"𪜀𫙑𫙒𫙓𫑘𫑙𫑚𫑝𫜴",
 			// Extension D
 			"𫝀𫞁𫞂𫞃𫞄𫟅𫟇𫟉𫠝",
+			// Extension E
+			"\u{2B820}\u{2CEAF}𫢸𫢹𫭼𫭽𫮃𫮄𫰜𫰛𫸩𬀩𬀪𬃊",
+			// Extension F
+			"\u{2CEB0}\u{2EBEF}",
 		);
 		const NONE: &'static str = concat!("〡〢〣〤〥〦〧〨〩〸〹〺ãç");
 
