@@ -15,9 +15,15 @@ extern crate test;
 #[macro_use]
 extern crate lazy_static;
 
+#[cfg(target_arch = "wasm32")]
+extern crate wasm_bindgen;
+
 // CharCode References
 // http://www.rikai.com/library/kanjitables/kanji_codes.unicode.shtml
 // http://unicode-table.com
+
+#[cfg(target_arch = "wasm32")]
+mod wasm;
 
 mod constants;
 mod table;
