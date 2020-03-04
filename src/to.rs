@@ -7,15 +7,6 @@ use super::constants::*;
 use super::table::*;
 use super::util::*;
 
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-
-#[cfg(target_arch = "wasm32")]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub fn to_hiragana_js(input: String) -> String {
-	to_hiragana(input)
-}
-
 /// Converts the input string into hiragana. Unknown characters just pass
 /// through unchanged.
 ///

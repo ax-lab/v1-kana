@@ -1,6 +1,10 @@
 //! Kind of japanese characters.
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
 /// Enumeration with character kinds.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CharKind {
 	/// Any character that is neither japanese nor romaji.
@@ -60,6 +64,7 @@ pub enum CharKind {
 	Romaji,
 }
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn get_kind(chr: char) -> CharKind {
 	match chr {
 		prolonged_mark_range!() => CharKind::BarLine,
