@@ -497,6 +497,17 @@ mod tests {
 		check("おんよみ", "on'yomi");
 		check("んよ んあ んゆ", "n'yo n'a n'yu");
 
+		// Roman characters
+		check(
+			"ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		);
+		check(
+			"ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ",
+			"abcdefghijklmnopqrstuvwxyz",
+		);
+		check("０１２３４５６７８９", "0123456789");
+
 		let all_kana = vec![
 			("ァ", "ぁ", "a"),
 			("ア", "あ", "a"),
