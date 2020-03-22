@@ -1,7 +1,7 @@
 #![feature(or_patterns)]
 
+extern crate kana;
 extern crate rustyline;
-extern crate x_kana;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -17,9 +17,9 @@ fn main() {
 				rl.add_history_entry(line.as_str());
 				println!();
 				println!("   Input:    {}", line.as_str());
-				println!("   Hiragana: {}", x_kana::to_hiragana(line.as_str()));
-				println!("   Katakana: {}", x_kana::to_katakana(line.as_str()));
-				println!("   Romaji:   {}", x_kana::to_romaji(line.as_str()));
+				println!("   Hiragana: {}", kana::to_hiragana(line.as_str()));
+				println!("   Katakana: {}", kana::to_katakana(line.as_str()));
+				println!("   Romaji:   {}", kana::to_romaji(line.as_str()));
 				println!();
 			}
 			Err(ReadlineError::Interrupted | ReadlineError::Eof) => {

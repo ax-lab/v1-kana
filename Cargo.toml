@@ -1,15 +1,15 @@
 [package]
-name = "x-kana"
+name = "kana"
 version = "0.1.0"
 authors = ["Ricardo B. Machado <ricardobm@gmail.com>"]
 license = "MIT"
 description = "Library for kana manipulation and fast translation between katakana, hiragana and romaji"
-repository = "https://github.com/ricardobm/x-kana"
+repository = "https://github.com/ricardobm/kana"
 keywords = ["japanese", "kana"]
 publish = false
 
 [lib]
-name = "x_kana"
+name = "kana"
 path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
