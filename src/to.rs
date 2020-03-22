@@ -94,10 +94,14 @@ pub fn to_katakana<S: AsRef<str>>(input: S) -> String {
 /// Note that this will pass through interpunct (`・`) marks. Other Japanese
 /// punctuation are converted to ASCII variants.
 pub fn to_romaji<S: AsRef<str>>(input: S) -> String {
-	// Representation for `っ` when it is not a valid double consonant.
+	// Representation for a `っ` that is not a double consonant.
 	const SMALL_TSU_REPR: char = '\'';
+	// Representation for an invalid iteration mark.
+	const INVALID_ITERATION_MARK: char = '?';
 
 	let mut was_small_tsu = false;
+
+	let mut last_romaji = "";
 
 	let mut src = input.as_ref();
 	let mut out = String::with_capacity(src.len());
@@ -114,6 +118,33 @@ pub fn to_romaji<S: AsRef<str>>(input: S) -> String {
 				out.push(SMALL_TSU_REPR); // Case of repeated `っ`
 			}
 			was_small_tsu = true;
+			done = true;
+		} else if next == 'ヽ' || next == 'ゝ' || next == 'ヾ' || next == 'ゞ' {
+			// Iteration marks repeat the last sillable
+			let voiced = next == 'ヾ' || next == 'ゞ';
+			let repeat = match last_romaji {
+				"yori" => "ri",
+				"koto" => "to",
+				_ => last_romaji,
+			};
+			let repeat = if voiced {
+				let voiced = romaji_to_voiced(repeat);
+				if voiced.len() > 0 {
+					voiced
+				} else {
+					// Even though it is wrong, we accept a voiced mark in a
+					// syllable that has no voiced equivalent.
+					repeat
+				}
+			} else {
+				repeat
+			};
+			if repeat.len() > 0 {
+				out.push_str(repeat);
+				last_romaji = repeat;
+			} else {
+				out.push(INVALID_ITERATION_MARK);
+			}
 			done = true;
 		} else if TO_ROMAJI_CHARS.contains(&next) {
 			// Try to convert all chunk sizes down to 1
@@ -132,6 +163,7 @@ pub fn to_romaji<S: AsRef<str>>(input: S) -> String {
 							was_small_tsu = false;
 						}
 					}
+					last_romaji = romaji;
 					out.push_str(romaji);
 					skip = chunk.len();
 					done = true;
@@ -631,13 +663,13 @@ mod tests {
 			("ヺ", "", "vo"),
 			("・", "", "/"),
 			("ー", "", "-"),
-			("ヽ", "", "ヽ"),
-			("ヾ", "", "ヾ"),
+			("ヽ", "", "?"),
+			("ヾ", "", "?"),
 			("ヿ", "", "koto"),
 			("", "゛", "゛"),
 			("", "゜", "゜"),
-			("", "ゝ", "ゝ"),
-			("", "ゞ", "ゞ"),
+			("", "ゝ", "?"),
+			("", "ゞ", "?"),
 			("", "ゟ", "yori"),
 		];
 		for (katakana, hiragana, val) in all_kana {
@@ -648,5 +680,151 @@ mod tests {
 				check(hiragana, val);
 			}
 		}
+	}
+
+	#[test]
+	fn test_to_romaji_repetition() {
+		fn check(kana: String, romaji: String) {
+			assert_eq!(
+				romaji,
+				to_romaji(kana.as_str()),
+				"kana: `{}`",
+				kana.as_str()
+			);
+
+			// Does the exact same test using the katakana iteration marks:
+			let kana = kana.replace("ゝ", "ヽ").replace("ゞ", "ヾ");
+			assert_eq!(
+				romaji,
+				to_romaji(kana.as_str()),
+				"kana: `{}` (katakana)",
+				kana.as_str()
+			);
+		}
+
+		fn check_repetition(kana: &str, romaji: &str, voiced: &str) {
+			let src = format!("{}ゝ", kana);
+			let out = format!("{}{}", romaji, romaji);
+			check(src, out);
+
+			let src = format!("{}ゝゝ", kana);
+			let out = format!("{}{}{}", romaji, romaji, romaji);
+			check(src, out);
+
+			let src = format!("{}ゞ", kana);
+			let out = format!("{}{}", romaji, voiced);
+			check(src, out);
+
+			let src = format!("{}ゞゞ", kana);
+			let out = format!("{}{}{}", romaji, voiced, voiced);
+			check(src, out);
+
+			let src = format!("{}ゝゞ", kana);
+			let out = format!("{}{}{}", romaji, romaji, voiced);
+			check(src, out);
+		}
+
+		let all_kana = vec![
+			("ァ", "ぁ", "a", "a"),
+			("ア", "あ", "a", "a"),
+			("ィ", "ぃ", "i", "i"),
+			("イ", "い", "i", "i"),
+			("ゥ", "ぅ", "u", "u"),
+			("ウ", "う", "u", "u"),
+			("ェ", "ぇ", "e", "e"),
+			("エ", "え", "e", "e"),
+			("ォ", "ぉ", "o", "o"),
+			("オ", "お", "o", "o"),
+			("カ", "か", "ka", "ga"),
+			("ガ", "が", "ga", "ga"),
+			("キ", "き", "ki", "gi"),
+			("ギ", "ぎ", "gi", "gi"),
+			("ク", "く", "ku", "gu"),
+			("グ", "ぐ", "gu", "gu"),
+			("ケ", "け", "ke", "ge"),
+			("ゲ", "げ", "ge", "ge"),
+			("コ", "こ", "ko", "go"),
+			("ゴ", "ご", "go", "go"),
+			("サ", "さ", "sa", "za"),
+			("ザ", "ざ", "za", "za"),
+			("シ", "し", "shi", "ji"),
+			("ジ", "じ", "ji", "ji"),
+			("ス", "す", "su", "zu"),
+			("ズ", "ず", "zu", "zu"),
+			("セ", "せ", "se", "ze"),
+			("ゼ", "ぜ", "ze", "ze"),
+			("ソ", "そ", "so", "zo"),
+			("ゾ", "ぞ", "zo", "zo"),
+			("タ", "た", "ta", "da"),
+			("ダ", "だ", "da", "da"),
+			("チ", "ち", "chi", "di"),
+			("ヂ", "ぢ", "di", "di"),
+			("ツ", "つ", "tsu", "du"),
+			("ヅ", "づ", "du", "du"),
+			("テ", "て", "te", "de"),
+			("デ", "で", "de", "de"),
+			("ト", "と", "to", "do"),
+			("ド", "ど", "do", "do"),
+			("ナ", "な", "na", "na"),
+			("ニ", "に", "ni", "ni"),
+			("ヌ", "ぬ", "nu", "nu"),
+			("ネ", "ね", "ne", "ne"),
+			("ノ", "の", "no", "no"),
+			("ハ", "は", "ha", "ba"),
+			("バ", "ば", "ba", "ba"),
+			("パ", "ぱ", "pa", "pa"),
+			("ヒ", "ひ", "hi", "bi"),
+			("ビ", "び", "bi", "bi"),
+			("ピ", "ぴ", "pi", "pi"),
+			("フ", "ふ", "fu", "bu"),
+			("ブ", "ぶ", "bu", "bu"),
+			("プ", "ぷ", "pu", "pu"),
+			("ヘ", "へ", "he", "be"),
+			("ベ", "べ", "be", "be"),
+			("ペ", "ぺ", "pe", "pe"),
+			("ホ", "ほ", "ho", "bo"),
+			("ボ", "ぼ", "bo", "bo"),
+			("ポ", "ぽ", "po", "po"),
+			("マ", "ま", "ma", "ma"),
+			("ミ", "み", "mi", "mi"),
+			("ム", "む", "mu", "mu"),
+			("メ", "め", "me", "me"),
+			("モ", "も", "mo", "mo"),
+			("ャ", "ゃ", "ya", "ya"),
+			("ヤ", "や", "ya", "ya"),
+			("ュ", "ゅ", "yu", "yu"),
+			("ユ", "ゆ", "yu", "yu"),
+			("ョ", "ょ", "yo", "yo"),
+			("ヨ", "よ", "yo", "yo"),
+			("ラ", "ら", "ra", "ra"),
+			("リ", "り", "ri", "ri"),
+			("ル", "る", "ru", "ru"),
+			("レ", "れ", "re", "re"),
+			("ロ", "ろ", "ro", "ro"),
+			("ヮ", "ゎ", "wa", "wa"),
+			("ワ", "わ", "wa", "wa"),
+			("ヰ", "ゐ", "wi", "wi"),
+			("ヱ", "ゑ", "we", "we"),
+			("ヲ", "を", "wo", "wo"),
+			("ン", "ん", "n", "n"),
+			("ヴ", "ゔ", "vu", "vu"),
+			("ヵ", "ゕ", "ka", "ga"),
+			("ヶ", "ゖ", "ka", "ga"),
+			("ヷ", "ヷ", "va", "va"),
+			("ヸ", "ヸ", "vi", "vi"),
+			("ヹ", "ヹ", "ve", "ve"),
+			("ヺ", "ヺ", "vo", "vo"),
+		];
+
+		for (katakana, hiragana, normal, voiced) in all_kana {
+			check_repetition(katakana, normal, voiced);
+			check_repetition(hiragana, normal, voiced);
+		}
+
+		check("ヿゝゝ".to_string(), "kotototo".to_string());
+		check("ヿゝゞ".to_string(), "kototodo".to_string());
+		check("ヿゞゞ".to_string(), "kotododo".to_string());
+		check("ゟゝゝ".to_string(), "yoririri".to_string());
+		check("ゟゞゞ".to_string(), "yoririri".to_string());
 	}
 }

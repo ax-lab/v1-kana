@@ -48,3 +48,34 @@ pub fn hiragana_to_katakana(c: char) -> char {
 		}
 	}
 }
+
+/// Converts a romaji syllable to the voiced equivalent.
+pub fn romaji_to_voiced(input: &str) -> &'static str {
+	match input {
+		"ka" => "ga",
+		"ki" => "gi",
+		"ku" => "gu",
+		"ke" => "ge",
+		"ko" => "go",
+
+		"sa" => "za",
+		"shi" => "ji",
+		"su" => "zu",
+		"se" => "ze",
+		"so" => "zo",
+
+		"ta" => "da",
+		"chi" => "di",
+		"tsu" => "du",
+		"te" => "de",
+		"to" => "do",
+
+		"ha" => "ba",
+		"hi" => "bi",
+		"fu" => "bu",
+		"he" => "be",
+		"ho" => "bo",
+
+		_ => "",
+	}
+}
