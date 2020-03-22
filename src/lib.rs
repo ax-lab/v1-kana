@@ -41,6 +41,39 @@ pub use to::*;
 mod kind;
 pub use kind::*;
 
+/// Expand hepburn style long vowels and katakana long marks `-` in the romaji
+/// string.
+pub fn expand_romaji<S: AsRef<str>>(input: S) -> String {
+	let mut output = input.as_ref().to_string();
+	loop {
+		let s = output.as_str();
+
+		let s = s.replace("ā", "aa");
+		let s = s.replace("ī", "ii");
+		let s = s.replace("ū", "uu");
+		let s = s.replace("ē", "ee");
+		let s = s.replace("ō", "oo");
+
+		let s = s.replace("â", "aa");
+		let s = s.replace("î", "ii");
+		let s = s.replace("û", "uu");
+		let s = s.replace("ê", "ee");
+		let s = s.replace("ô", "oo");
+
+		let s = s.replace("a-", "aa");
+		let s = s.replace("i-", "ii");
+		let s = s.replace("u-", "uu");
+		let s = s.replace("e-", "ee");
+		let s = s.replace("o-", "oo");
+
+		if s != output {
+			output = s;
+		} else {
+			break s;
+		}
+	}
+}
+
 // spell-checker: disable
 
 #[cfg(test)]
@@ -317,5 +350,13 @@ mod tests {
 				);
 			}
 		}
+	}
+
+	#[test]
+	fn test_expand_romaji() {
+		assert_eq!(
+			"aaiiuueeoo / aaaaeeee / aaiiuueeoo / aaiiuueeoo / aaaiiiuuueeeooo / aaaiiiuuueeeooo",
+			expand_romaji("a-i-u-e-o- / a---e--- / āīūēō / âîûêô / ā-ī-ū-ē-ō- / â-î-û-ê-ô-")
+		);
 	}
 }
