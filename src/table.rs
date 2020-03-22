@@ -443,6 +443,9 @@ lazy_static! {
 		"ヿ" => "こと", // U+30FF - Katakana Digraph Koto
 		"ゟ" => "より", // U+309F - Hiragana Digraph Yori
 
+		"ヽ" => "ゝ", // Iteration marks
+		"ヾ" => "ゞ",
+
 		// Those `n` cases differ from waka_kana because we don't do IME mode
 		"n" => "ん",
 		// "nn" => "ん",

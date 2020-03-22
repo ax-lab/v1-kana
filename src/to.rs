@@ -166,6 +166,33 @@ mod tests {
 	use super::*;
 
 	#[test]
+	fn test_to_katakana() {
+		fn check(kana: &str, input: &str) {
+			assert_eq!(kana, to_katakana(input), "input `{}`", input);
+			assert_eq!(
+				kana.to_uppercase(),
+				to_katakana(input.to_uppercase()),
+				"input `{}`",
+				input
+			);
+			assert_eq!(
+				kana.to_lowercase(),
+				to_katakana(input.to_lowercase()),
+				"input `{}`",
+				input
+			);
+		}
+
+		const H: &str = "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ";
+		const K: &str = "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ";
+		check(K, H);
+		check(K, K);
+
+		// Iteration marks
+		check("ヽヾ", "ゝゞ");
+	}
+
+	#[test]
 	fn test_to_hiragana() {
 		fn check(kana: &str, input: &str) {
 			assert_eq!(kana, to_hiragana(input), "input `{}`", input);
@@ -191,6 +218,9 @@ mod tests {
 		const K: &str = "ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ";
 		check(H, K);
 		check(H, H);
+
+		// Iteration marks
+		check("ゝゞ", "ヽヾ");
 
 		// Romaji
 		const D: &str = "しゃぎゃつっじゃあんなん んあんんざ xzm";
@@ -339,8 +369,8 @@ mod tests {
 			("ヺ", "ゔぉ", "vo"),
 			("・", "・", "/"),
 			("ー", "ー", "-"),
-			("ヽ", "ヽ", ""),
-			("ヾ", "ヾ", ""),
+			("ヽ", "ゝ", ""),
+			("ヾ", "ゞ", ""),
 			("ヿ", "こと", "koto"),
 			("゛", "゛", ""),
 			("゜", "゜", ""),

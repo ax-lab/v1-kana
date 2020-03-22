@@ -41,6 +41,10 @@ pub fn hiragana_to_katakana(c: char) -> char {
 		let code = (c as u32) + OFFSET;
 		unsafe { std::char::from_u32_unchecked(code) }
 	} else {
-		c
+		match c {
+			'ゝ' => 'ヽ',
+			'ゞ' => 'ヾ',
+			_ => c,
+		}
 	}
 }
